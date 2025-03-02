@@ -1,0 +1,121 @@
+                                 Zomato data analysis-> 
+# Video33 How to read data from Database with the help of pandas
+#Read database with the help of pandas
+sbse Pehle engine create krna pdega
+import pandas as pd
+import sqlite3
+conn = sqlite3.connect(r"C:\Users\HP\OneDrive\Desktop\DA_Projects\Project3/zomato_rawdata.sqlite")
+df = pd.read_sql_query("select * from users", conn)
+df.shape
+df.columns
+print(df.head(4))
+--------------------------------------------------------------------------------
+Video34 checking missing values
+
+df.isnull().sum()
+df.isnull().sum()/len(df)*100 #percentage me aa jayegi
+df['rate'].unique()
+----------
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+df.replace(('NEW'), np.NAN, inplace=True)
+df.replace(('-'), np.NAN, inplace = True)
+
+df['rate'].unique()
+-----------------------
+
+df['rate'] = df['rate'].apply(lambda x : float(x.split('/')[0]) if type(x) == str else x)
+--------------------
+df['rate']
+
+-------------------------------------------------------------------------------------
+
+Video 35 Analyze relation between online order and rating
+
+x = pd.crosstab(df['rate'], df['online_order'])
+x          
+x.plot(kind = 'bar', stacked = True)
+normalize_df = x.div(x.sum(axis = 1).astype(float), axis = 0)
+normalize_df
+normalize_df = normalize_df*100
+normalize_df
+normalize_df.plot(kind = 'bar', stacked = True)
+
+----------------------------------------------------------------------------------
+Video36 How to do text cleaning
+
+df['rest_type'].isnull().sum()
+data = df.dropna()
+#data.dropna
+data['rest_type'].isnull().sum()
+data['rest_type'].unique()
+quick_bites_df = data[data['rest_type'].str.contains('Quick Bites')]
+quick_bites_df.shape
+quick_bites_df.columns
+quick_bites_df['reviews_list']
+quick_bites_df['reviews_list'] = quick_bites_df['reviews_list'].apply(lambda x : x.lower())
+from nltk.corpus import RegexpTokenizer
+tokenizer = RegexpTokenizer("[a-zA-Z]+")
+tokenizer
+tokenizer.tokenize(quick_bites_df['reviews_list'][3])
+sample = data[0:2000]
+reviews_token = sample['reviews_list'].apply(tokenizer.tokenize)
+
+---------------------------------------------------------------------------------
+
+Video37 Perform Unigram Analysis and removal of stopwards
+
+from nltk.corpus import stopwords
+stop = stopwords.words('english')
+print(stop)
+stop.extend(["N", "Rated", "RATED", "rated", "NAN"])
+print(stop)
+reviews_token
+rev3  =reviews_token[3]
+print(rev3)
+print([token for token in rev3 if token not in stop])
+reviews_token_clean = reviews_token.apply(lambda each_review : [token for token in each_review if token not in stop])
+reviews_token_clean
+total_reviews_2d = list(reviews_token_clean)
+total_reviews_1d = []
+for review in total_reviews_2d :
+    for word in review:
+        total_reviews_1d.append(word)
+print(total_reviews_1d)
+from nltk import FreqDist
+fd = FreqDist()
+for word in total_reviews_1d:
+    fd[word] = fd[word]+1
+fd.most_common(20)
+fd.plot(20)
+
+---------------------------------------------------------------------------------
+
+Video38 Perform biagram and Trigram Analysis
+
+from nltk import FreqDist, bigrams, trigrams
+bi_grams  =bigrams(total_reviews_1d)
+bi_grams
+fd_bigrams = FreqDist()
+for bigram in bi_grams:
+   fd_bigrams[bigram] =  fd_bigrams[bigram] + 1
+fd_bigrams.most_common(20)
+fd_bigrams.plot(20)
+tri_grams = trigrams(total_reviews_1d)
+
+fd_trigrams =  FreqDist()
+
+for trigram in tri_grams:
+    fd_trigrams[trigram] = fd_trigrams [trigram] + 1
+
+fd_trigrams.most_common(20)
+
+--------------------------------------------------------------------------------------
+
+Video39 Extracts geographical coordinates from data
+
+
+
+
+
